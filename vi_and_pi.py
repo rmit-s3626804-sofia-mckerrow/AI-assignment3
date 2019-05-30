@@ -1,3 +1,6 @@
+# Names: Sofia McKerrow and Wenpeng Jiang
+# Student IDs: s3626804, s3674270
+
 ### MDP Value Iteration and Policy Iteration
 ### Acknowledgement: start-up codes were adapted with permission from Prof. Emma Brunskill of Stanford University
 
@@ -140,11 +143,42 @@ def value_iteration(P, nS, nA, gamma=0.9, tol=1e-3):
 
 	value_function = np.zeros(nS)
 	policy = np.zeros(nS, dtype=int)
+
 	############################
 	# YOUR IMPLEMENTATION HERE #
+	while True:
+		# current value function
+		value_current = np.copy(value_function)
+		# stopping condition
+		delta = 0
 
+		for state in range(nS):
+			actions_values = np.zeros(nA)
+
+			# loop over possible actions
+			for act in range(nA):
+				for prob, next_state, reward, done in P[state][act]:
+					# use Bellman equation to get action values
+					actions_values[act] += prob * (reward + gamma * value_function[next_state])
+
+			# get the best action value
+			best_action_value = max(actions_values)
+
+			# get the biggest difference between best action value and the previous value function
+			delta = max(delta, abs(best_action_value - value_function[state]))
+
+			# update value function to best action value
+			value_function[state] = best_action_value
+
+			# update the policy
+			policy[state] = np.argmax(actions_values)
+		
+		# if optimal value function is found
+		if delta < tol * (1 - gamma) / gamma:
+			break
 
 	############################
+
 	return value_function, policy
 
 def render_single(env, policy, max_steps=100):
