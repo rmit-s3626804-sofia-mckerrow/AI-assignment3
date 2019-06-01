@@ -146,9 +146,8 @@ def value_iteration(P, nS, nA, gamma=0.9, tol=1e-3):
 
 	############################
 	# YOUR IMPLEMENTATION HERE #
+	
 	while True:
-		# current value function
-		value_current = np.copy(value_function)
 		# stopping condition
 		delta = 0
 
@@ -161,19 +160,20 @@ def value_iteration(P, nS, nA, gamma=0.9, tol=1e-3):
 					# use Bellman equation to get action values
 					actions_values[act] += prob * (reward + gamma * value_function[next_state])
 
-			# get the best action value
+			# get the highest action value
 			best_action_value = max(actions_values)
 
 			# get the biggest difference between best action value and the previous value function
 			delta = max(delta, abs(best_action_value - value_function[state]))
 
-			# update value function to best action value
+			# update value function for the current state
 			value_function[state] = best_action_value
 
-			# update the policy
-			policy[state] = np.argmax(actions_values)
+			# update the policy based on the best action
+			best_action = np.argmax(actions_values)
+			policy[state] = best_action
 		
-		# if optimal value function is found
+		# check if the values have reached convergence -> iterations can stop
 		if delta < tol * (1 - gamma) / gamma:
 			break
 
