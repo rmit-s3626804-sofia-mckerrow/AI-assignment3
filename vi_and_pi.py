@@ -138,7 +138,6 @@ def policy_iteration(P, nS, nA, gamma=0.9, tol=10e-3):
 		value_function = policy_evaluation(P, nS, nA, policy, gamma, tol)
 		new_policy = policy_improvement(P, nS, nA, value_function, policy, gamma)
 		if (np.all(policy == new_policy)):
-			print ('Policy-Iteration converged at step %d.' %(i+1))
 			break
 		policy = new_policy
 
