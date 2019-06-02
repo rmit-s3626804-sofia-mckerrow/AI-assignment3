@@ -60,28 +60,20 @@ def policy_evaluation(P, nS, nA, policy, gamma=0.9, tol=1e-3):
 	############################
 	# YOUR IMPLEMENTATION HERE #
 	while True:
-	# TODO: Implement!
-	delta = 0  #delta = change in value of state from one iteration to next
-
-	for state in range(nS):  #for all states
-		val = 0  #initiate value as 0
-		for action in enumerate(policy[state]): #for all actions/action probabilities
-			for prob,next_state,reward,terminal in P[state][action]:  #transition probabilities,state,rewards of each action
-				val += prob * (reward + gamma * value_function[next_state])  #eqn to calculate
-		delta = max(delta, np.abs(val-value_function[state]))
-		value_function[state] = val
-	if delta < tol:  #break if the change in value is less than the threshold (theta)
-		break
+		old_value_function = np.copy(value_function)
+		for state in range(nS):
+			action = policy[state]
+			value_function[state] = sum([prob * (reward + gamma * old_value_function[next_state]) 
+			for prob, next_state, reward, terminal in P[state][action]])
+			# for prob, next_state, reward, terminal in P[state][action]:
+			# 	value_function[state] += prob * (reward + gamma * old_value_function[next_state])
+	
+		if (np.sum((np.fabs(old_value_function - value_function))) <= tol):
+			# value converged
+			break
 
 	############################
 	return value_function
-
-def one_step_look_ahead(P, nA, state, value_function, gamma = 0.9):
-	action = np.zeros(nA)
-	for act in range(nA):
-		for prob, next_state, reward, terminal in P[state][act]:
-				action[act] += prob * (reward + gamma * value_function[next_state])
-	return action
 
 def policy_improvement(P, nS, nA, value_from_policy, policy, gamma=0.9):
 	"""Given the value function from policy improve the policy.
@@ -109,8 +101,12 @@ def policy_improvement(P, nS, nA, value_from_policy, policy, gamma=0.9):
 	# YOUR IMPLEMENTATION HERE #
 
 	for state in range(nS):
-		act_values = one_step_look_ahead(P, nA, state, value_from_policy, gamma)
-		new_policy = np.argmax(policy[state])
+		q_state = np.zeros(nA)
+		for action in range(nA):
+			#one step look ahead 
+			q_state[action] = sum([prob * (reward + gamma * value_from_policy[next_state]) 
+			for prob, next_state, reward, terminal in P[state][action]])
+		new_policy[state] = np.argmax(q_state)
 	############################
 	return new_policy
 
@@ -138,7 +134,13 @@ def policy_iteration(P, nS, nA, gamma=0.9, tol=10e-3):
 
 	############################
 	# YOUR IMPLEMENTATION HERE #
-
+	for i in range(100):
+		value_function = policy_evaluation(P, nS, nA, policy, gamma, tol)
+		new_policy = policy_improvement(P, nS, nA, value_function, policy, gamma)
+		if (np.all(policy == new_policy)):
+			print ('Policy-Iteration converged at step %d.' %(i+1))
+			break
+		policy = new_policy
 
 	############################
 	return value_function, policy
