@@ -104,17 +104,19 @@ def policy_improvement(P, nS, nA, value_from_policy, policy, gamma=0.9):
 	# YOUR IMPLEMENTATION HERE #
 
 	# iterate through each state
-	for state in range(nS):
-		q_state = np.zeros(nA)
+	def one_step_lookahead(P, state, nA, value_from_policy, gamma=0.9):
+		action_values = np.zeros(nA)
 
-		# loop through possible actions
 		for action in range(nA):
-			# use one step look ahead to calculate the q-state values
-			q_state[action] = sum([prob * (reward + gamma * value_from_policy[next_state]) \
-				for prob, next_state, reward, terminal in P[state][action]])
-		
-		# update policy based on the best action
-		new_policy[state] = np.argmax(q_state)
+			for prob,next_state,reward,terminal in P[state][action]:
+				#sum value of all possible state in with action
+				action_values[action] += prob * (reward + (gamma * value_from_policy[next_state]))
+		return action_values
+
+	for state in range(nS):
+		#one step look ahead
+		action_values = one_step_lookahead(P, state, nA, value_from_policy, gamma)
+		new_policy[state] = np.argmax(action_values)
 	
 	############################
 	
@@ -145,7 +147,7 @@ def policy_iteration(P, nS, nA, gamma=0.9, tol=10e-3):
 	############################
 	# YOUR IMPLEMENTATION HERE #
 
-	max_iterations = 200000
+	max_iterations = 100000
 	
 	for i in range(max_iterations):
 		# get state value function for policy
@@ -155,7 +157,7 @@ def policy_iteration(P, nS, nA, gamma=0.9, tol=10e-3):
 
 		# check if the policy has converged
 		if (np.all(policy == new_policy)):
-			print ('Policy iteration converged in %d iterations.' %(i+1))
+			print ('Policy converged in %d iterations.' %(i+1))
 			break
 		
 		# update the policy
