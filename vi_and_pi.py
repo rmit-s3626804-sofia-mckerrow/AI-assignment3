@@ -104,7 +104,7 @@ def policy_improvement(P, nS, nA, value_from_policy, policy, gamma=0.9):
 	# YOUR IMPLEMENTATION HERE #
 
 	# iterate through each state
-	def one_step_lookahead(P, state, nA, value_from_policy, gamma=0.9):
+	def one_step_look_ahead(P, state, nA, value_from_policy, gamma=0.9):
 		action_values = np.zeros(nA)
 
 		for action in range(nA):
